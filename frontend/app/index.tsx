@@ -6,35 +6,41 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Dialog from "react-native-dialog";
+import { MockedGroups } from "./mocks";
 
 const Page = () => {
-  const groups = [
-    {
-      _id: 1,
-      name: "Running club",
-      description: "A club to burn calories",
-      icon_url:
-        "https://as2.ftcdn.net/v2/jpg/05/78/72/67/1000_F_578726709_AtgfsV2daQE7DxZx4K6Sa5h0VCsWiKIa.jpg",
-    },
-    {
-      _id: 2,
-      name: "Study club",
-      description: "A club to burn the brain",
-      icon_url: "https://cdn-icons-png.flaticon.com/512/2466/2466734.png",
-    },
-    {
-      _id: 3,
-      name: "Taco Tuesday club",
-      description: "A club to burn the sadness",
-      icon_url: "https://cdn-icons-png.flaticon.com/512/4062/4062916.png",
-    },
-  ];
+  const [name, setName] = useState("");
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      const user = await AsyncStorage.getItem("user");
+      if (!user) {
+        setTimeout(() => {
+          setVisible(true), 100;
+        });
+      } else {
+        setName(user);
+      }
+    };
+    loadUser();
+  }, []);
+
+  const setUser = async () => {
+    let randomString = (Math.random() + 1).toString(36).substring(7);
+    const userName = `${name}#${randomString}`;
+    setName(userName);
+    setVisible(false);
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView style={styles.container}>
-        {groups.map((group) => (
+        {MockedGroups.map((group) => (
           <Link
             href={{
               pathname: "/(chat)/[chatid]",
@@ -56,6 +62,14 @@ const Page = () => {
           </Link>
         ))}
       </ScrollView>
+      <Dialog.Container visible={visible}>
+        <Dialog.Title>Username required </Dialog.Title>
+        <Dialog.Description>
+          Please insert a name to start chatting{" "}
+        </Dialog.Description>
+        <Dialog.Input onChangeText={setName} />
+        <Dialog.Button label="Set name" onPress={setUser} />
+      </Dialog.Container>
     </View>
   );
 };
