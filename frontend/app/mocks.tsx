@@ -1,3 +1,5 @@
+import { Message } from "./message.interface";
+
 export const MockedGroups = [
   {
     _id: 1,
@@ -20,10 +22,18 @@ export const MockedGroups = [
   },
 ];
 
-export const MockedMessages = [
-  { _id: 1, content: "Hola", group_id: 1, user: "Paco", file: undefined },
+export const MockedMessages: Message[] = [
+  {
+    _id: 1,
+    _createTime: 1711998264,
+    content: "Hola",
+    group_id: 1,
+    user: "Paco",
+    file: undefined,
+  },
   {
     _id: 2,
+    _createTime: 1711998264,
     content: "Que tal",
     group_id: 1,
     user: "Paco",
@@ -31,6 +41,7 @@ export const MockedMessages = [
   },
   {
     _id: 3,
+    _createTime: 1711999224,
     content: "👍",
     group_id: 1,
     user: "수민",

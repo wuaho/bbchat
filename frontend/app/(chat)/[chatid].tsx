@@ -9,8 +9,9 @@ import {
   ListRenderItem,
   FlatList,
   SafeAreaView,
+  Keyboard,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MockedGroups, MockedMessages } from "../mocks";
@@ -22,6 +23,7 @@ const Page = () => {
   const [user, setUser] = useState<string | null>(null);
   const navigation = useNavigation();
   const [newMessage, setNewMessage] = useState("");
+  const listRef = useRef<FlatList>(null);
 
   const getMessages = () => {
     // TODO: replace with the real query
@@ -38,6 +40,7 @@ const Page = () => {
     //TODO replace with the real mutation
     messages.push({
       _id: messages.length + 1,
+      _createTime: Date.now(),
       content: newMessage,
       group_id: parseInt(chatid),
       user: user || "unknownUser",
@@ -62,7 +65,14 @@ const Page = () => {
     loadUser();
   }, []);
 
+  useEffect(() => {
+    setTimeout(() => {
+      listRef.current?.scrollToEnd({ animated: true });
+    }, 300);
+  }, [messages]);
+
   const handleSendMessage = () => {
+    Keyboard.dismiss();
     addMessage();
     setNewMessage("");
   };
@@ -71,8 +81,27 @@ const Page = () => {
     const isUserMessage = item.user === user;
 
     return (
-      <View>
-        <Text>{item.content}</Text>
+      <View
+        style={[
+          styles.messageContainer,
+          isUserMessage
+            ? styles.userMessageContainer
+            : styles.otherMessageContainer,
+        ]}
+      >
+        {item.content !== "" && (
+          <Text
+            style={[
+              styles.messageText,
+              isUserMessage ? styles.userMessageText : null,
+            ]}
+          >
+            {item.content}
+          </Text>
+        )}
+        <Text style={styles.timestamp}>
+          {new Date(item._createTime).toLocaleTimeString()} - {item.user}
+        </Text>
       </View>
     );
   };
@@ -82,8 +111,11 @@ const Page = () => {
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={100}
       >
         <FlatList
+          ref={listRef}
+          ListFooterComponent={<View style={{ padding: 5 }} />}
           data={messages}
           renderItem={renderMessage}
           keyExtractor={(item) => item._id.toString()}
