@@ -21,8 +21,8 @@ const Page = () => {
       const user = await AsyncStorage.getItem("user");
       if (!user) {
         setTimeout(() => {
-          setVisible(true), 100;
-        });
+          setVisible(true);
+        }, 100);
       } else {
         setName(user);
       }
@@ -31,9 +31,8 @@ const Page = () => {
   }, []);
 
   const setUser = async () => {
-    let randomString = (Math.random() + 1).toString(36).substring(7);
-    const userName = `${name}#${randomString}`;
-    setName(userName);
+    await AsyncStorage.setItem("user", name);
+    setName(name);
     setVisible(false);
   };
 
@@ -65,7 +64,7 @@ const Page = () => {
       <Dialog.Container visible={visible}>
         <Dialog.Title>Username required </Dialog.Title>
         <Dialog.Description>
-          Please insert a name to start chatting{" "}
+          Please insert a name to start chatting.
         </Dialog.Description>
         <Dialog.Input onChangeText={setName} />
         <Dialog.Button label="Set name" onPress={setUser} />
